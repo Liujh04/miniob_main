@@ -18,6 +18,7 @@ See the Mulan PSL v2 for more details. */
 #include "common/log/log.h"
 #include <sstream>
 #include "value.h"
+#include "util/date.h"
 
 const char *ATTR_TYPE_NAME[] = {"undefined", "chars", "ints", "floats", "dates","booleans"};
 
@@ -56,6 +57,10 @@ void Value::set_data(char *data, int length)
     } break;
     case INTS: {
       num_value_.int_value_ = *(int *)data;
+      length_               = length;
+    } break;
+    case DATES: {
+      num_value_.date_value_ = *(int *)data;
       length_               = length;
     } break;
     case FLOATS: {
@@ -152,6 +157,9 @@ std::string Value::to_string() const
     case INTS: {
       os << num_value_.int_value_;
     } break;
+    case DATES: {
+      return date_to_string(num_value_.date_value_);
+    } break;
     case FLOATS: {
       os << common::double_to_str(num_value_.float_value_);
     } break;
@@ -172,7 +180,7 @@ int Value::compare(const Value &other) const
 {
   if (this->attr_type_ == other.attr_type_) {
     switch (this->attr_type_) {
-      case INTS: {
+      case INTS: case DATES:{
         return common::compare_int((void *)&this->num_value_.int_value_, (void *)&other.num_value_.int_value_);
       } break;
       case FLOATS: {
@@ -216,6 +224,9 @@ int Value::get_int() const
     case INTS: {
       return num_value_.int_value_;
     }
+    case DATES: {
+      return num_value_.date_value_;
+    }
     case FLOATS: {
       return (int)(num_value_.float_value_);
     }
@@ -244,6 +255,9 @@ float Value::get_float() const
     case INTS: {
       return float(num_value_.int_value_);
     } break;
+    case DATES: {
+      return num_value_.date_value_;
+    }
     case FLOATS: {
       return num_value_.float_value_;
     } break;
@@ -286,6 +300,9 @@ bool Value::get_boolean() const
     case INTS: {
       return num_value_.int_value_ != 0;
     } break;
+    case DATES: {
+      return num_value_.date_value_!=0;
+    }
     case FLOATS: {
       float val = num_value_.float_value_;
       return val >= EPSILON || val <= -EPSILON;

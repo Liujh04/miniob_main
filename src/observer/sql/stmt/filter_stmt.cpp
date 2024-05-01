@@ -121,18 +121,22 @@ RC FilterStmt::create_filter_unit(Db *db, Table *default_table, std::unordered_m
     filter_obj.init_attr(Field(table, field));
     filter_unit->set_right(filter_obj);
   } else {
-    Value tmp=condition.right_value;
     if(condition.right_value.attr_type() == CHARS){
       int32_t date=-1;
       RC rc=string_to_date(condition.right_value.data(), date);
       if(rc != RC::SUCCESS){
         return rc;
       }
-      tmp=Value(date,1);
+      FilterObj filter_obj;
+      filter_obj.init_value(Value(date,1));
+      filter_unit->set_right(filter_obj);
     }
-    FilterObj filter_obj;
-    filter_obj.init_value(tmp);
-    filter_unit->set_right(filter_obj);
+    else{
+      FilterObj filter_obj;
+      filter_obj.init_value(condition.right_value);
+      filter_unit->set_right(filter_obj);
+    }
+    
   }
 
   filter_unit->set_comp(comp);
